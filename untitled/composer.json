@@ -1,0 +1,23 @@
+{
+  "name": "vendor/untitled",
+  "description": "description",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "denis",
+      "email": "email@example.com"
+    }
+  ],
+  "require": {
+    "slim/slim": "^4.13",
+    "nyholm/psr7": "^1.8",
+    "slim/psr7": "^1.6",
+    "ext-pdo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Classes\\": "src/"
+    }
+  }
+}
