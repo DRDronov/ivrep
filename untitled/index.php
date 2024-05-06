@@ -9,13 +9,14 @@ require 'config.php';
 
 $app = AppFactory::create();
 
-$setup = new \Classes\Setup();
+$database = new \Classes\Database();
+$setup = new \Classes\FeedbackRepository($database);
 
 //1 getById
-$app->get('/api.php/api/feedback/{id}', function (Request $request, Response $response, $args) use ($setup){
+$app->get('/api/feedback/{id}', function (Request $request, Response $response, $args) use ($setup){
     $id = $args["id"];
 
-    $feedback = $setup->getFeedbackById($id);
+    $feedback = $setup->findById($id);
 
     if(!$feedback){
         $response->getBody()->write(json_encode(['error' => 'Feedback not found']));
@@ -28,14 +29,14 @@ $app->get('/api.php/api/feedback/{id}', function (Request $request, Response $re
 
 //2 getByPage
 
-$app->get('/api.php/api/feedbacks/{page}', function (Request $request, Response $response, $args) use ($setup){
+$app->get('/api/feedbacks/{page}', function (Request $request, Response $response, $args) use ($setup){
 
     $page = $args["page"];
     $perPage = 20;
 
-    $feedback = $setup->getFeedbacks($page, $perPage);
+    $feedback = $setup->find($page, $perPage);
 
-    $totalFeedbacks = $setup->getFeedbacksLength();
+    $totalFeedbacks = $setup->count();
 
     $totalPages = ceil($totalFeedbacks/$perPage);
 
@@ -49,8 +50,8 @@ $app->get('/api.php/api/feedbacks/{page}', function (Request $request, Response 
 });
 
 //5 length
-$app->get('/api.php/api/feedbacksLength', function (Request $request, Response $response) use ($setup){
-    $feedbacks = $setup->getFeedbackLength();
+$app->get('/api/feedbacksLength', function (Request $request, Response $response) use ($setup){
+    $feedbacks = $setup->count();
     if(!$feedbacks){
         $response->getBody()->write(json_encode(['error' => 'Feedbacks not found']));
         return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
@@ -60,7 +61,7 @@ $app->get('/api.php/api/feedbacksLength', function (Request $request, Response $
 });
 
 //3 delete
-$app->get('/api.php/api/delete/{id}', function (Request $request, Response $response, $args) use ($setup){
+$app->get('/api/delete/{id}', function (Request $request, Response $response, $args) use ($setup){
 
     $id = $args["id"];
 
@@ -68,6 +69,12 @@ $app->get('/api.php/api/delete/{id}', function (Request $request, Response $resp
     if(!$isAdmin){
         $response->getBody()->write(json_encode(['error' => 'Unauthorized']));
         return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
+    }
+
+    $search = $setup->findById($id);
+    if(!$search){
+        $response->getBody()->write(json_encode(['error' => 'Feedback not found']));
+        return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
     }
 
     $feedback = $setup->delete($id);
@@ -83,7 +90,7 @@ $app->get('/api.php/api/delete/{id}', function (Request $request, Response $resp
 
 //4 create
 
-$app->post('/api.php/api/create', function (Request $request, Response $response) use ($setup){
+$app->post('/api/create', function (Request $request, Response $response) use ($setup){
     $data = json_decode($request->getBody()->getContents(), true);
 
     $result = $setup->create($data);
@@ -118,7 +125,7 @@ function checkAdminCredentials($request){
 $app->addErrorMiddleware(true, true, true);
 
 //0 hello
-$app->get('/api.php/', function (Request $request, Response $response) {
+$app->get('/', function (Request $request, Response $response) {
     $response->getBody()->write("Hello World!");
     return $response;
 

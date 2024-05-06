@@ -3,21 +3,21 @@
 namespace Classes;
 
 use PDO;
-class Setup{
+class FeedbackRepository{
     private $data;
 
-    public function __construct(){
-        $this->data = new Database();
+    public function __construct($database){
+        $this->data = $database;
     }
 
-    public function getFeedbackById($id){
+    public function findById($id){
 
         $stmt = $this->data->prepare("SELECT * FROM feedbacks WHERE id = :id");
         $stmt->execute(array("id" => $id));
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getFeedbacks($page = 1, $perPage = 20) {
+    public function find($page = 1, $perPage = 20) {
         $offset = ($page - 1) * $perPage;
 
         $stmt = $this->data->prepare("SELECT * FROM feedbacks LIMIT :offset, :perPage");
@@ -27,7 +27,7 @@ class Setup{
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getFeedbacksLength() {
+    public function count() {
         $stmt = $this->data->prepare("SELECT COUNT(*) FROM feedbacks WHERE 1");
         $stmt->execute();
         return $stmt->fetchColumn();
