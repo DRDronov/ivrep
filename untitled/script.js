@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const formData = new FormData(this);
 
         try {
-            const response = await fetch('/api/create', {
+            const response = await fetch('/api.php/api/create', {
                 method: 'POST',
                 body: JSON.stringify(Object.fromEntries(formData)),
                 headers: {
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 }); //обработчик закрытия сообщений
 
 function loadFeedbacks(page) {
-    fetch(`/api/feedbacks/${page}`)
+    fetch(`/api.php/api/feedbacks/${page}`)
         .then(response => response.json())
         .then(data => {
             const feedbacksList = document.getElementById('feedbacks');
