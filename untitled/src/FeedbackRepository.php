@@ -4,60 +4,65 @@ namespace Classes;
 
 use PDO;
 class FeedbackRepository{
-    private $data;
+    private Database $data;
 
-    public function __construct($database){
+    public function __construct(Database $database){
         $this->data = $database;
     }
 
-    public function findById($id){
+    public function findById(int $id): ?array{
 
         $stmt = $this->data->prepare("SELECT * FROM feedbacks WHERE id = :id");
         $stmt->execute(array("id" => $id));
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
-    public function find($page = 1, $perPage = 20) {
+    public function find(int $page = 1, int $perPage = 20): array{
         $offset = ($page - 1) * $perPage;
 
-        $stmt = $this->data->prepare("SELECT * FROM feedbacks LIMIT :offset, :perPage");
-        $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
-        $stmt->bindValue(":perPage", $perPage, PDO::PARAM_INT);
-        $stmt->execute();
+        $stmt = $this->data->prepare("SELECT * FROM feedbacks ORDER BY id DESC LIMIT :offset, :perPage ");
+
+        $stmt->execute([':offset' => $offset, ':perPage' => $perPage]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function count() {
-        $stmt = $this->data->prepare("SELECT COUNT(*) FROM feedbacks WHERE 1");
+    public function count(): int{
+        $stmt = $this->data->prepare("SELECT COUNT(*) FROM feedbacks");
         $stmt->execute();
         return $stmt->fetchColumn();
     }
 
-    public function delete($id)
-    {
-        $stmt = $this->data->prepare("DELETE FROM feedbacks WHERE id = :id");
-        $stmt->execute(array("id" => $id));
-        return true;
+    public function delete($id) : bool{
+        try {
+            $stmt = $this->data->prepare("DELETE FROM feedbacks WHERE id = :id");
+            $stmt->execute(array("id" => $id));
+            $rowCount = $stmt->rowCount();
+            if ($rowCount === 0) {
+                throw new \Exception("No feedback with ID $id found.");
+            }
+            return true;
+        } catch (\PDOException $e) {
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
-    public  function getFieldsForRead()
-    {
+    public  function getFieldsForRead() : array{
         return [
             'id' => 'int',
             'author' => 'string',
             'content' => 'string'
         ];
     }
-    public  function getFieldsForCreate()
-    {
+    public  function getFieldsForCreate() : array{
         return [
             'author' => 'string',
             'content' => 'string'
         ];
     }
 
-    public function create(array $arr)
-    {
+    public function create(array $arr) : array{
         $fields = $this->getFieldsForCreate();
 
         if(empty($arr['content']) || empty($arr['author'])){

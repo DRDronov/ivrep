@@ -57,6 +57,7 @@ $app->get('/api/feedbacksLength', function (Request $request, Response $response
         return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
     }
     $response->getBody()->write(json_encode($feedbacks));
+
     return $response->withHeader('Content-Type', 'application/json');
 });
 
@@ -71,11 +72,7 @@ $app->get('/api/delete/{id}', function (Request $request, Response $response, $a
         return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
     }
 
-    $search = $setup->findById($id);
-    if(!$search){
-        $response->getBody()->write(json_encode(['error' => 'Feedback not found']));
-        return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
-    }
+
 
     $feedback = $setup->delete($id);
 
@@ -106,7 +103,7 @@ $app->post('/api/create', function (Request $request, Response $response) use ($
 
 
 
-function checkAdminCredentials($request){
+function checkAdminCredentials($request): bool{
     $config = include('config.php');
     $auth = $request->getHeaderLine('Authorization');
     if($auth){
@@ -125,7 +122,7 @@ function checkAdminCredentials($request){
 $app->addErrorMiddleware(true, true, true);
 
 //0 hello
-$app->get('/', function (Request $request, Response $response) {
+$app->get('/', function (Request $request, Response $response) : Response {
     $response->getBody()->write("Hello World!");
     return $response;
 
