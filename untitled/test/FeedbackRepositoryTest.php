@@ -12,13 +12,12 @@ class FeedbackRepositoryTest extends TestCase{
     protected PDOStatement $PDOStatementMock;
     protected FeedbackRepository $feedbackRepository;
 
-    protected function setUp(): void{
+    public function testFindById(): void{
+
         $this->databaseMock = $this->createMock(Database::class);
         $this->PDOStatementMock = $this->createMock(PDOStatement::class);
         $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
-    }
 
-    public function testFindById(): void{
         $id = 9;
         $expectedResult = ['id' => 1, 'author' => 'author1', 'content' => 'content1'];
 
@@ -43,6 +42,11 @@ class FeedbackRepositoryTest extends TestCase{
     }
 
     public function testFind(): void{
+
+        $this->databaseMock = $this->createMock(Database::class);
+        $this->PDOStatementMock = $this->createMock(PDOStatement::class);
+        $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
+
         $page = 2;
         $perPage = 10;
         $expectedResult = [
@@ -70,6 +74,11 @@ class FeedbackRepositoryTest extends TestCase{
     }
 
     public function testCount(): void{
+
+        $this->databaseMock = $this->createMock(Database::class);
+        $this->PDOStatementMock = $this->createMock(PDOStatement::class);
+        $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
+
         $expectedCount = 5;
 
         $this->databaseMock->expects($this->once())
@@ -91,6 +100,11 @@ class FeedbackRepositoryTest extends TestCase{
 
 
     public function testDelete(): void{
+
+        $this->databaseMock = $this->createMock(Database::class);
+        $this->PDOStatementMock = $this->createMock(PDOStatement::class);
+        $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
+
         $id = 3;
 
         $this->databaseMock->expects($this->once())
@@ -113,6 +127,11 @@ class FeedbackRepositoryTest extends TestCase{
 
 
     public function testGetFieldsForRead(): void{
+
+
+        $this->databaseMock = $this->createMock(Database::class);
+        $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
+
         $expectedResult = [
             'id' => 'int',
             'author' => 'string',
@@ -125,6 +144,10 @@ class FeedbackRepositoryTest extends TestCase{
     }
 
     public function testGetFieldsForCreate(): void{
+
+        $this->databaseMock = $this->createMock(Database::class);
+        $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
+
         $expectedResult = [
             'author' => 'string',
             'content' => 'string'
@@ -137,6 +160,11 @@ class FeedbackRepositoryTest extends TestCase{
     }
 
     public function testCreate(): void{
+
+        $this->databaseMock = $this->createMock(Database::class);
+        $this->PDOStatementMock = $this->createMock(PDOStatement::class);
+        $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
+
         $feedbackData = ['author' => 'John', 'content' => 'Test feedback'];
 
         $this->databaseMock->expects($this->once())

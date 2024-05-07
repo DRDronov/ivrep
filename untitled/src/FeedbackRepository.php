@@ -10,20 +10,29 @@ class FeedbackRepository{
         $this->data = $database;
     }
 
-    public function findById(int $id): ?array{
-
+    public function findById(int $id): array{
         $stmt = $this->data->prepare("SELECT * FROM feedbacks WHERE id = :id");
         $stmt->execute(array("id" => $id));
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        if(!$res){
+            return array('error' => 'Feedback not found');
+        }else{
+            return $res;
+        }
     }
 
-    public function find(int $page = 1, int $perPage = 20): array{
+    public function find(int $page = 1, int $perPage = 20): ?array{
         $offset = ($page - 1) * $perPage;
+        $totalPages = ceil($this->count()/$perPage);
 
         $stmt = $this->data->prepare("SELECT * FROM feedbacks ORDER BY id DESC LIMIT :offset, :perPage ");
-
         $stmt->execute([':offset' => $offset, ':perPage' => $perPage]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if(count($res) == 0){
+            return array('error' => 'Feedback not found');
+        }else{
+            return array("feedbacks" => $res, "totalPages" => $totalPages);
+        }
     }
 
     public function count(): int{

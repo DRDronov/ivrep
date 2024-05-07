@@ -2,20 +2,24 @@
 
 namespace Classes;
 
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use \Classes\FeedbackRepository;
+
 
 class HomeController{
-    private $container;
     private $repository;
     private $database;
-    public function __construct($container){
-        $this->container = $container;
+    public function __construct(){
         $this->database = new \Classes\Database();
         $this->repository = new \Classes\FeedbackRepository($this->database);
     }
 
-    public function hello(ServerRequestInterface $request, ResponseInterface $response, array $args){
+    public function setRepository(FeedbackRepository $repository){
+        $this->repository = $repository;
+    }
+
+    public function hello(ServerRequestInterface $request, ResponseInterface $response){
         $response->getBody()->write("Hello World!");
         return $response;
     }
@@ -25,13 +29,15 @@ class HomeController{
 
         $feedback = $this->repository->findById($id);
 
-        if (!$feedback) {
-            $response->getBody()->write(json_encode(['error' => 'Feedback not found']));
-            return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+        if(array_key_exists('error', $feedback)) {
+            $response = $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+            $response->getBody()->write(json_encode($feedback));
+            return $response;
         }
 
+        $response = $response->withStatus(200)->withHeader('Content-Type', 'application/json');
         $response->getBody()->write(json_encode($feedback));
-        return $response->withHeader('Content-Type', 'application/json');
+        return $response;
 
     }
 
@@ -42,21 +48,20 @@ class HomeController{
 
         $feedback = $this->repository->find($page, $perPage);
 
-        $totalFeedbacks = $this->repository->count();
-
-        $totalPages = ceil($totalFeedbacks / $perPage);
-
-        if (!$feedback) {
-            $response->getBody()->write(json_encode(['error' => 'Feedback not found']));
-            return $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+        if(array_key_exists('error', $feedback)) {
+            $response = $response->withStatus(404)->withHeader('Content-Type', 'application/json');
+            $response->getBody()->write(json_encode($feedback));
+            return $response;
         }
-        $response->getBody()->write(json_encode(['feedbacks' => $feedback, 'totalPages' => $totalPages]));
-        return $response->withHeader('Content-Type', 'application/json');
+
+        $response = $response->withStatus(200)->withHeader('Content-Type', 'application/json');
+        $response->getBody()->write(json_encode($feedback));
+        return $response;
 
     }
 
     public function checkAdminCredentials($request): bool{
-        $config = include('config.php');
+        $config = "config.php";
         $auth = $request->getHeaderLine('Authorization');
         if($auth){
             list($type, $credentials) = explode(' ', $auth);
@@ -95,12 +100,16 @@ class HomeController{
         $result = $this->repository->create($data);
 
         if(isset($result['error'])){
+            $response = $response->withStatus(500)->withHeader('Content-Type', 'application/json');
             $response->getBody()->write(json_encode(['error' => $result['error']]));
-            return $response->withStatus(500)->withHeader('Content-Type', 'application/json');
+            return $response;
         }
 
+        $response = $response->withStatus(201)->withHeader('Content-Type', 'application/json');
         $response->getBody()->write(json_encode(['success' => $result['success']]));
-        return $response->withHeader('Content-Type', 'application/json');
+        return $response;
     }
+
+
 
 }
