@@ -33,10 +33,6 @@ class ComposerStaticInitc4c4d5b97938df126d1f45260ca8f686
             'Psr\\Container\\' => 14,
             'PhpParser\\' => 10,
         ),
-        'N' => 
-        array (
-            'Nyholm\\Psr7\\' => 12,
-        ),
         'F' => 
         array (
             'Fig\\Http\\Message\\' => 17,
@@ -48,6 +44,8 @@ class ComposerStaticInitc4c4d5b97938df126d1f45260ca8f686
         ),
         'C' => 
         array (
+            'Composer\\XdebugHandler\\' => 23,
+            'Composer\\Pcre\\' => 14,
             'Classes\\' => 8,
         ),
     );
@@ -91,10 +89,6 @@ class ComposerStaticInitc4c4d5b97938df126d1f45260ca8f686
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
         ),
-        'Nyholm\\Psr7\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/nyholm/psr7/src',
-        ),
         'Fig\\Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/fig/http-message-util/src',
@@ -106,6 +100,14 @@ class ComposerStaticInitc4c4d5b97938df126d1f45260ca8f686
         'DeepCopy\\' => 
         array (
             0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
+        ),
+        'Composer\\XdebugHandler\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/xdebug-handler/src',
+        ),
+        'Composer\\Pcre\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/pcre/src',
         ),
         'Classes\\' => 
         array (

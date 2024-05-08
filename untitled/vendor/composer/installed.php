@@ -3,13 +3,31 @@
         'name' => 'vendor/untitled',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '1191af967d87e4b3f615d49fbd8b13d63e093738',
+        'reference' => '0bc20031695d13174592b5bf580ecf9bf9ef708f',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
         'dev' => true,
     ),
     'versions' => array(
+        'composer/pcre' => array(
+            'pretty_version' => '3.1.3',
+            'version' => '3.1.3.0',
+            'reference' => '5b16e25a5355f1f3afdfc2f954a0a80aec4826a8',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/./pcre',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'composer/xdebug-handler' => array(
+            'pretty_version' => '3.0.5',
+            'version' => '3.0.5.0',
+            'reference' => '6c1925561632e83d60a44492e0b344cf48ab85ef',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/./xdebug-handler',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'fig/http-message-util' => array(
             'pretty_version' => '1.1.5',
             'version' => '1.1.5.0',
@@ -46,15 +64,6 @@
             'aliases' => array(),
             'dev_requirement' => true,
         ),
-        'nyholm/psr7' => array(
-            'pretty_version' => '1.8.1',
-            'version' => '1.8.1.0',
-            'reference' => 'aa5fc277a4f5508013d571341ade0c3886d4d00e',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../nyholm/psr7',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'phar-io/manifest' => array(
             'pretty_version' => '2.0.4',
             'version' => '2.0.4.0',
@@ -72,12 +81,6 @@
             'install_path' => __DIR__ . '/../phar-io/version',
             'aliases' => array(),
             'dev_requirement' => true,
-        ),
-        'php-http/message-factory-implementation' => array(
-            'dev_requirement' => false,
-            'provided' => array(
-                0 => '1.0',
-            ),
         ),
         'phpunit/php-code-coverage' => array(
             'pretty_version' => '10.1.14',
@@ -382,7 +385,7 @@
         'vendor/untitled' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '1191af967d87e4b3f615d49fbd8b13d63e093738',
+            'reference' => '0bc20031695d13174592b5bf580ecf9bf9ef708f',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

@@ -1,40 +1,37 @@
 <?php
 namespace test;
 
+use Classes\store\FeedbackRepository;
 use PHPUnit\Framework\TestCase;
-use Classes\FeedbackRepository;
 use Classes\Database;
 use PDOStatement;
 use PDO;
 
 class FeedbackRepositoryTest extends TestCase{
-    protected Database $databaseMock;
-    protected PDOStatement $PDOStatementMock;
-    protected FeedbackRepository $feedbackRepository;
 
     public function testFindById(): void{
 
-        $this->databaseMock = $this->createMock(Database::class);
-        $this->PDOStatementMock = $this->createMock(PDOStatement::class);
-        $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
+        $databaseMock = $this->createMock(Database::class);
+        $PDOStatementMock = $this->createMock(PDOStatement::class);
+        $feedbackRepository = new FeedbackRepository($databaseMock);
 
         $id = 9;
         $expectedResult = ['id' => 1, 'author' => 'author1', 'content' => 'content1'];
 
-        $this->databaseMock->expects($this->once())
+        $databaseMock->expects($this->once())
             ->method('prepare')
             ->with($this->equalTo("SELECT * FROM feedbacks WHERE id = :id"))
-            ->willReturn($this->PDOStatementMock);
+            ->willReturn($PDOStatementMock);
 
-        $this->PDOStatementMock->expects($this->once())
+        $PDOStatementMock->expects($this->once())
             ->method('execute')
             ->with(['id' => $id]);
 
-        $this->PDOStatementMock->expects($this->once())
+        $PDOStatementMock->expects($this->once())
             ->method('fetch')
             ->willReturn($expectedResult);
 
-        $result = $this->feedbackRepository->findById($id);
+        $result = $feedbackRepository->findById($id);
 
         $this->assertSame($expectedResult['id'], $result['id']);
         $this->assertSame($expectedResult['author'], $result['author']);
@@ -43,57 +40,67 @@ class FeedbackRepositoryTest extends TestCase{
 
     public function testFind(): void{
 
-        $this->databaseMock = $this->createMock(Database::class);
-        $this->PDOStatementMock = $this->createMock(PDOStatement::class);
-        $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
+        $databaseMock = $this->createMock(Database::class);
+        $PDOStatementMock = $this->createMock(PDOStatement::class);
+        $PDOStatementMockCount = $this->createMock(PDOStatement::class);
+        $feedbackRepository = new FeedbackRepository($databaseMock);
 
-        $page = 2;
+        $page = 1;
         $perPage = 10;
         $expectedResult = [
             ['id' => 5, 'author' => 'author5', 'content' => 'content5'],
             ['id' => 4, 'author' => 'author4', 'content' => 'content4']
         ];
 
-        $this->databaseMock->expects($this->once())
+        $databaseMock->expects($this->atLeastOnce())
             ->method('prepare')
-            ->with($this->equalTo("SELECT * FROM feedbacks ORDER BY id DESC LIMIT :offset, :perPage "))
-            ->willReturn($this->PDOStatementMock);
+            ->willReturnMap([
+                ["SELECT * FROM feedbacks ORDER BY id DESC LIMIT :offset, :perPage ", $PDOStatementMock],
+                ["SELECT COUNT(*) FROM feedbacks", $PDOStatementMockCount]
+            ]);
 
-        $this->PDOStatementMock->expects($this->once())
+        $PDOStatementMockCount->expects($this->once())
             ->method('execute')
-            ->with([':offset' => ($page - 1) * $perPage, ':perPage' => $perPage]);
+            ->willReturn(true);
+        $PDOStatementMockCount->expects($this->once())
+            ->method('fetchColumn')
+            ->willReturn(100);
 
-        $this->PDOStatementMock->expects($this->once())
+        $PDOStatementMock->expects($this->once())
+            ->method('execute')
+            ->with([':offset' => ($page - 1) * $perPage, ':perPage' => $perPage])
+            ->willReturn(true);
+        $PDOStatementMock->expects($this->once())
             ->method('fetchAll')
             ->with(PDO::FETCH_ASSOC)
             ->willReturn($expectedResult);
 
-        $result = $this->feedbackRepository->find($page, $perPage);
+        $result = $feedbackRepository->find($page, $perPage);
 
-        $this->assertSame($expectedResult, $result);
+        $this->assertSame($expectedResult, $result['feedbacks']);
     }
 
     public function testCount(): void{
 
-        $this->databaseMock = $this->createMock(Database::class);
-        $this->PDOStatementMock = $this->createMock(PDOStatement::class);
-        $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
+        $databaseMock = $this->createMock(Database::class);
+        $PDOStatementMock = $this->createMock(PDOStatement::class);
+        $feedbackRepository = new FeedbackRepository($databaseMock);
 
         $expectedCount = 5;
 
-        $this->databaseMock->expects($this->once())
+        $databaseMock->expects($this->once())
             ->method('prepare')
             ->with($this->equalTo("SELECT COUNT(*) FROM feedbacks"))
-            ->willReturn($this->PDOStatementMock);
+            ->willReturn($PDOStatementMock);
 
-        $this->PDOStatementMock->expects($this->once())
+        $PDOStatementMock->expects($this->once())
             ->method('execute');
 
-        $this->PDOStatementMock->expects($this->once())
+        $PDOStatementMock->expects($this->once())
             ->method('fetchColumn')
             ->willReturn($expectedCount);
 
-        $result = $this->feedbackRepository->count();
+        $result = $feedbackRepository->count();
 
         $this->assertSame($expectedCount, $result);
     }
@@ -101,36 +108,37 @@ class FeedbackRepositoryTest extends TestCase{
 
     public function testDelete(): void{
 
-        $this->databaseMock = $this->createMock(Database::class);
-        $this->PDOStatementMock = $this->createMock(PDOStatement::class);
-        $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
+        $databaseMock = $this->createMock(Database::class);
+        $PDOStatementMock = $this->createMock(PDOStatement::class);
+        $feedbackRepository = new FeedbackRepository($databaseMock);
 
-        $id = 3;
+        $id = 999;
 
-        $this->databaseMock->expects($this->once())
+        $expectedResult = array("success" => "Delete is successful");
+
+        $databaseMock->expects($this->once())
             ->method('prepare')
             ->with($this->equalTo("DELETE FROM feedbacks WHERE id = :id"))
-            ->willReturn($this->PDOStatementMock);
+            ->willReturn($PDOStatementMock);
 
-        $this->PDOStatementMock->expects($this->once())
+        $PDOStatementMock->expects($this->once())
             ->method('execute')
             ->with(['id' => $id]);
 
-        $this->PDOStatementMock->expects($this->once())
+        $PDOStatementMock->expects($this->once())
             ->method('rowCount')
             ->willReturn(1);
 
-        $result = $this->feedbackRepository->delete($id);
+        $result = $feedbackRepository->delete($id);
 
-        $this->assertTrue($result);
+        $this->assertSame($expectedResult,$result);
     }
 
 
     public function testGetFieldsForRead(): void{
 
-
-        $this->databaseMock = $this->createMock(Database::class);
-        $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
+        $databaseMock = $this->createMock(Database::class);
+        $feedbackRepository = new FeedbackRepository($databaseMock);
 
         $expectedResult = [
             'id' => 'int',
@@ -138,22 +146,22 @@ class FeedbackRepositoryTest extends TestCase{
             'content' => 'string'
         ];
 
-        $result = $this->feedbackRepository->getFieldsForRead();
+        $result = $feedbackRepository->getFieldsForRead();
 
         $this->assertSame($expectedResult, $result);
     }
 
     public function testGetFieldsForCreate(): void{
 
-        $this->databaseMock = $this->createMock(Database::class);
-        $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
+        $databaseMock = $this->createMock(Database::class);
+        $feedbackRepository = new FeedbackRepository($databaseMock);
 
         $expectedResult = [
             'author' => 'string',
             'content' => 'string'
         ];
 
-        $result = $this->feedbackRepository->getFieldsForCreate();
+        $result = $feedbackRepository->getFieldsForCreate();
 
         $this->assertSame($expectedResult, $result);
 
@@ -161,24 +169,25 @@ class FeedbackRepositoryTest extends TestCase{
 
     public function testCreate(): void{
 
-        $this->databaseMock = $this->createMock(Database::class);
-        $this->PDOStatementMock = $this->createMock(PDOStatement::class);
-        $this->feedbackRepository = new FeedbackRepository($this->databaseMock);
+        $databaseMock = $this->createMock(Database::class);
+        $PDOStatementMock = $this->createMock(PDOStatement::class);
+        $feedbackRepository = new FeedbackRepository($databaseMock);
 
         $feedbackData = ['author' => 'John', 'content' => 'Test feedback'];
 
-        $this->databaseMock->expects($this->once())
+        $databaseMock->expects($this->once())
             ->method('prepare')
             ->with($this->equalTo("INSERT INTO feedbacks (author, content) VALUES (:author, :content)"))
-            ->willReturn($this->PDOStatementMock);
+            ->willReturn($PDOStatementMock);
 
-        $this->PDOStatementMock->expects($this->once())
+        $PDOStatementMock->expects($this->once())
             ->method('execute')
             ->with($feedbackData);
 
-        $result = $this->feedbackRepository->create($feedbackData);
+        $result = $feedbackRepository->create($feedbackData);
 
         $this->assertSame(['success' => 'Feedback created successfully'], $result);
+
     }
 
 }

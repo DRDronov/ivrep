@@ -1,8 +1,11 @@
 <?php
 
-namespace Classes;
+namespace Classes\store;
 
+use Classes\Database;
+use PDOException;
 use PDO;
+
 class FeedbackRepository{
     private Database $data;
 
@@ -21,7 +24,13 @@ class FeedbackRepository{
         }
     }
 
-    public function find(int $page = 1, int $perPage = 20): ?array{
+    public function count(): int{
+        $stmt = $this->data->prepare("SELECT COUNT(*) FROM feedbacks");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    public function find(int $page = 1, int $perPage = 20): array{
         $offset = ($page - 1) * $perPage;
         $totalPages = ceil($this->count()/$perPage);
 
@@ -35,13 +44,7 @@ class FeedbackRepository{
         }
     }
 
-    public function count(): int{
-        $stmt = $this->data->prepare("SELECT COUNT(*) FROM feedbacks");
-        $stmt->execute();
-        return $stmt->fetchColumn();
-    }
-
-    public function delete($id) : bool{
+    public function delete($id) : array{
         try {
             $stmt = $this->data->prepare("DELETE FROM feedbacks WHERE id = :id");
             $stmt->execute(array("id" => $id));
@@ -49,11 +52,9 @@ class FeedbackRepository{
             if ($rowCount === 0) {
                 throw new \Exception("No feedback with ID $id found.");
             }
-            return true;
-        } catch (\PDOException $e) {
-            return false;
+            return array("success" => "Delete is successful");
         } catch (\Exception $e) {
-            return false;
+            return array('error' => $e->getMessage());
         }
     }
 
@@ -93,6 +94,5 @@ class FeedbackRepository{
             return ['error' => $e->getMessage()];
         }
     }
-
 
 }

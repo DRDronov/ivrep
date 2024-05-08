@@ -4,6 +4,8 @@ namespace Classes;
 
 use PDO;
 
+require_once 'config.php';
+
 class Database{
 
     private PDO $pdo;
